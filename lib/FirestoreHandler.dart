@@ -6,9 +6,12 @@ class FirestoreHandler {
   static Future<void> addUser(String userID) async {
     db.collection("users").doc(userID).set({});
   }
-  // static Future<QuerySnapshot<Map<String, dynamic>>> getUserInfo(){
 
-  // }
+  static Future<QuerySnapshot<Map<String, dynamic>>>? getUserInfo(
+      String userID) async {
+    return db.collection("users").doc(userID).collection("tickets").get();
+  }
+
   static Future<void> addTicket(String ticketID, String userID) async {
     db
         .collection("users")

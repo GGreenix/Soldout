@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/FirestoreHandler.dart';
 import 'payment_configurations.dart' as payment_configurations;
 import 'package:pay/pay.dart';
 
@@ -38,84 +41,104 @@ class _PaySampleAppState extends State<PaySampleApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('T-shirt Shop'),
-      ),
-      backgroundColor: Colors.white,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        children: [
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 20),
-            child: const Image(
-              image: AssetImage('assets/images/ts_10_11019a.jpg'),
-              height: 350,
-            ),
-          ),
-          const Text(
-            'Amanda\'s Polo Shirt',
-            style: TextStyle(
-              fontSize: 20,
-              color: Color(0xff333333),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            '\$50.20',
-            style: TextStyle(
-              color: Color(0xff777777),
-              fontSize: 15,
-            ),
-          ),
-          const SizedBox(height: 15),
-          const Text(
-            'Description',
-            style: TextStyle(
-              fontSize: 15,
-              color: Color(0xff333333),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 5),
-          const Text(
-            'A versatile full-zip that you can wear all day long and even...',
-            style: TextStyle(
-              color: Color(0xff777777),
-              fontSize: 15,
-            ),
-          ),
-          // Example pay button configured using an asset
-          FutureBuilder<PaymentConfiguration>(
-              future: _googlePayConfigFuture,
-              builder: (context, snapshot) => snapshot.hasData
-                  ? GooglePayButton(
-                      paymentConfiguration: snapshot.data!,
-                      paymentItems: _paymentItems,
-                      type: GooglePayButtonType.buy,
-                      margin: const EdgeInsets.only(top: 15.0),
-                      onPaymentResult: onGooglePayResult,
-                      loadingIndicator: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    )
-                  : const SizedBox.shrink()),
-          // Example pay button configured using a string
-          ApplePayButton(
-            paymentConfiguration: PaymentConfiguration.fromJsonString(
-                payment_configurations.defaultApplePay),
-            paymentItems: _paymentItems,
-            style: ApplePayButtonStyle.black,
-            type: ApplePayButtonType.buy,
-            margin: const EdgeInsets.only(top: 15.0),
-            onPaymentResult: onApplePayResult,
-            loadingIndicator: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          ),
-          const SizedBox(height: 15)
-        ],
-      ),
-    );
+        appBar: AppBar(
+          title: const Text('T-shirt Shop'),
+        ),
+        backgroundColor: Colors.white,
+        body:
+            // Container(
+            //   margin: const EdgeInsets.symmetric(vertical: 20),
+            //   child: const Image(
+            //     image: AssetImage('assets/images/ts_10_11019a.jpg'),
+            //     height: 350,
+            //   ),
+            // ),
+            // const Text(
+            //   'Amanda\'s Polo Shirt',
+            //   style: TextStyle(
+            //     fontSize: 20,
+            //     color: Color(0xff333333),
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 5),
+            // const Text(
+            //   '\$50.20',
+            //   style: TextStyle(
+            //     color: Color(0xff777777),
+            //     fontSize: 15,
+            //   ),
+            // ),
+            // const SizedBox(height: 15),
+            // const Text(
+            //   'Description',
+            //   style: TextStyle(
+            //     fontSize: 15,
+            //     color: Color(0xff333333),
+            //     fontWeight: FontWeight.bold,
+            //   ),
+            // ),
+            // const SizedBox(height: 5),
+            // const Text(
+            //   'A versatile full-zip that you can wear all day long and even...',
+            //   style: TextStyle(
+            //     color: Color(0xff777777),
+            //     fontSize: 15,
+            //   ),
+            // ),
+            // Example pay button configured using an asset
+            // FutureBuilder<PaymentConfiguration>(
+            //     future: _googlePayConfigFuture,
+            //     builder: (context, snapshot) => snapshot.hasData
+            //         ? GooglePayButton(
+            //             paymentConfiguration: snapshot.data!,
+            //             paymentItems: _paymentItems,
+            //             type: GooglePayButtonType.buy,
+            //             margin: const EdgeInsets.only(top: 15.0),
+            //             onPaymentResult: onGooglePayResult,
+            //             loadingIndicator: const Center(
+            //               child: CircularProgressIndicator(),
+            //             ),
+            //           )
+            //         : const SizedBox.shrink()),
+            // // Example pay button configured using a string
+            // ApplePayButton(
+            //   paymentConfiguration: PaymentConfiguration.fromJsonString(
+            //       payment_configurations.defaultApplePay),
+            //   paymentItems: _paymentItems,
+            //   style: ApplePayButtonStyle.black,
+            //   type: ApplePayButtonType.buy,
+            //   margin: const EdgeInsets.only(top: 15.0),
+            //   onPaymentResult: onApplePayResult,
+            //   loadingIndicator: const Center(
+            //     child: CircularProgressIndicator(),
+            //   ),
+            // ),
+            FutureBuilder(
+          future: FirestoreHandler.getUserInfo(
+              FirebaseAuth.instance.currentUser!.uid),
+          builder: (BuildContext context,
+              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (BuildContext context, index) {
+                    return ListTile(
+                      title: Text(snapshot.data!.docs.first
+                          .data()["ticket"]
+                          .toString()),
+                      leading: Text(
+                          snapshot.data!.docs.first.data()["price"].toString()),
+                    );
+                  });
+            } else {
+              return Container(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+          },
+        ));
   }
 }
