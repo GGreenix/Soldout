@@ -42,7 +42,7 @@ class _PaySampleAppState extends State<PaySampleApp> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('T-shirt Shop'),
+          title: const Text('tickets'),
         ),
         backgroundColor: Colors.white,
         body:
@@ -121,15 +121,31 @@ class _PaySampleAppState extends State<PaySampleApp> {
               AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: snapshot.data!.docs.length + 1,
                   itemBuilder: (BuildContext context, index) {
-                    return ListTile(
-                      title: Text(snapshot.data!.docs.first
-                          .data()["ticket"]
-                          .toString()),
-                      leading: Text(
-                          snapshot.data!.docs.first.data()["price"].toString()),
-                    );
+                    return index != snapshot.data!.docs.length
+                        ? ListTile(
+                            title: Text(snapshot.data!.docs.first
+                                .data()["ticket"]
+                                .toString()),
+                            leading: Text(snapshot.data!.docs.first
+                                .data()["price"]
+                                .toString()),
+                          )
+                        : FutureBuilder<PaymentConfiguration>(
+                            future: _googlePayConfigFuture,
+                            builder: (context, snapshot) => snapshot.hasData
+                                ? GooglePayButton(
+                                    paymentConfiguration: snapshot.data!,
+                                    paymentItems: _paymentItems,
+                                    type: GooglePayButtonType.buy,
+                                    margin: const EdgeInsets.only(top: 15.0),
+                                    onPaymentResult: onGooglePayResult,
+                                    loadingIndicator: const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                : const SizedBox.shrink());
                   });
             } else {
               return Container(
